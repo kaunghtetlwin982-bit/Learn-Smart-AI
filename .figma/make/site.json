@@ -1,5 +1,6 @@
 {
-  "description": "Designed for Grade 11 students, this mobile-first study assistant helps users find, save, and track exam questions while providing AI tutoring and learning resources.",
+  "title": "Learn Smart AI",
+  "description": "Grade 11 AI Study Assistant",
   "robots": {
     "index": false
   },
