@@ -6,10 +6,10 @@ interface Props {
   savedIds: Set<string>;
   onOpenQuestion: (id: string) => void;
   onNavigate: (tab: string, subject?: string) => void;
-  viewedCount: number;
+  learningTopicCount: number;
 }
 
-export default function HomeScreen({ savedIds, onOpenQuestion, onNavigate, viewedCount }: Props) {
+export default function HomeScreen({ savedIds, onOpenQuestion, onNavigate, learningTopicCount }: Props) {
   const [search, setSearch] = useState('');
 
   const recentQuestions = QUESTIONS.slice(0, 5);
@@ -21,11 +21,11 @@ export default function HomeScreen({ savedIds, onOpenQuestion, onNavigate, viewe
       <div className="px-5 pt-10 pb-6" style={{ background: 'linear-gradient(135deg, #4F46E5 0%, #6366F1 100%)' }}>
         <div className="flex items-center justify-between mb-5">
           <div>
-            <p className="text-xs font-medium mb-0.5" style={{ color: 'rgba(255,255,255,0.7)', fontFamily: 'var(--font-display)' }}>Grade 11 • 2024</p>
+            <p className="text-xs font-medium mb-0.5" style={{ color: 'rgba(255,255,255,0.7)', fontFamily: 'var(--font-display)' }}>Grade 11 • 2026</p>
             <h1 className="text-2xl font-bold" style={{ color: '#fff', fontFamily: 'var(--font-display)' }}>Learn Smart AI</h1>
           </div>
           <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm" style={{ background: 'rgba(255,255,255,0.2)', color: '#fff', fontFamily: 'var(--font-display)' }}>
-            JD
+            KM
           </div>
         </div>
         <p className="text-sm mb-4" style={{ color: 'rgba(255,255,255,0.85)' }}>Ready to learn today? 📚</p>
@@ -68,7 +68,7 @@ export default function HomeScreen({ savedIds, onOpenQuestion, onNavigate, viewe
           {/* Stats row */}
           <div className="px-5 pt-4 grid grid-cols-3 gap-3">
             {[
-              { label: 'Viewed', value: viewedCount, icon: '👁' },
+              { label: 'Learning Topics', value: learningTopicCount, icon: '📖' },
               { label: 'Saved', value: savedIds.size, icon: '🔖' },
               { label: 'Subjects', value: 5, icon: '📚' },
             ].map(stat => (

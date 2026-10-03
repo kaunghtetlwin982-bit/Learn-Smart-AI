@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { SUBJECTS, SUBJECT_COLORS, SUBJECT_PROGRESS } from '../data/mockData';
 
 interface Props {
@@ -14,14 +15,23 @@ const SETTINGS = [
 ];
 
 const ABOUT_ITEMS = [
-  { icon: 'ℹ️', label: 'About Learn Smart AI', detail: 'v1.0 · Demo Build' },
+  { icon: 'ℹ️', label: 'About Learn Smart AI', detail: 'v1.0' },
   { icon: '🔒', label: 'Privacy Policy', detail: '' },
   { icon: '⭐', label: 'Rate the App', detail: '' },
   { icon: '💬', label: 'Send Feedback', detail: '' },
 ];
 
 export default function ProfileScreen({ savedCount, viewedCount, onNavigate }: Props) {
+  const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
+    try { return localStorage.getItem('learn-smart-notifications') !== 'off'; } catch { return true; }
+  });
   const overallProgress = Math.round(Object.values(SUBJECT_PROGRESS).reduce((a, b) => a + b, 0) / SUBJECTS.length);
+
+  const toggleNotifications = () => setNotificationsEnabled(enabled => {
+    const next = !enabled;
+    try { localStorage.setItem('learn-smart-notifications', next ? 'on' : 'off'); } catch { /* storage may be unavailable */ }
+    return next;
+  });
 
   return (
     <div className="flex flex-col min-h-full pb-20">
@@ -30,13 +40,13 @@ export default function ProfileScreen({ savedCount, viewedCount, onNavigate }: P
         <div className="flex items-center gap-4 mb-5">
           <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold"
             style={{ background: 'rgba(255,255,255,0.2)', color: '#fff', fontFamily: 'var(--font-display)', border: '2px solid rgba(255,255,255,0.3)' }}>
-            JD
+            KM
           </div>
           <div>
-            <h2 className="text-lg font-bold" style={{ color: '#fff', fontFamily: 'var(--font-display)' }}>Jamie Davis</h2>
+            <h2 className="text-lg font-bold" style={{ color: '#fff', fontFamily: 'var(--font-display)' }}>Khin Eaidra Min</h2>
             <p className="text-sm" style={{ color: 'rgba(255,255,255,0.75)' }}>Grade 11 Student</p>
             <span className="inline-block mt-1 text-xs px-2.5 py-1 rounded-full font-medium" style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}>
-              2024 Academic Year
+              2026 Academic Year
             </span>
           </div>
         </div>
@@ -107,15 +117,16 @@ export default function ProfileScreen({ savedCount, viewedCount, onNavigate }: P
             <div key={item.label}
               className="flex items-center gap-3 px-4 py-3.5 cursor-pointer active:bg-gray-50 transition-all"
               style={{ borderBottom: i < SETTINGS.length - 1 ? '1px solid #F1F5F9' : 'none' }}
-              onClick={() => item.label === 'Progress' && onNavigate('progress')}>
+              onClick={() => item.label === 'Progress' ? onNavigate('progress') : item.label === 'Notifications' ? toggleNotifications() : undefined}>
               <span className="text-lg w-8">{item.icon}</span>
               <div className="flex-1">
                 <p className="text-sm font-medium" style={{ color: '#1E293B' }}>{item.label}</p>
-                {item.detail && <p className="text-xs" style={{ color: '#94A3B8' }}>{item.detail}</p>}
+                {item.label === 'Notifications' ? <p className="text-xs" style={{ color: '#94A3B8' }}>Study reminders {notificationsEnabled ? 'on' : 'off'}</p> : item.detail && <p className="text-xs" style={{ color: '#94A3B8' }}>{item.detail}</p>}
               </div>
+              {item.label === 'Notifications' ? <span role="switch" aria-checked={notificationsEnabled} aria-label="Notifications" className="relative w-10 h-6 rounded-full transition-colors" style={{ background: notificationsEnabled ? '#4F46E5' : '#CBD5E1' }}><span className="absolute top-1 w-4 h-4 rounded-full bg-white transition-all" style={{ left: notificationsEnabled ? '22px' : '4px' }} /></span> :
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" strokeWidth="2.5" strokeLinecap="round">
                 <path d="M9 18l6-6-6-6" />
-              </svg>
+              </svg>}
             </div>
           ))}
         </div>
@@ -141,8 +152,7 @@ export default function ProfileScreen({ savedCount, viewedCount, onNavigate }: P
         </div>
 
         <div className="text-center py-2 mb-4">
-          <p className="text-xs" style={{ color: '#CBD5E1' }}>Learn Smart AI · Grade 11 Demo · v1.0</p>
-          <p className="text-xs mt-1" style={{ color: '#CBD5E1' }}>Built for student project competition</p>
+            <p className="text-xs" style={{ color: '#CBD5E1' }}>Learn Smart AI · Grade 11 · v1.0</p>
         </div>
       </div>
     </div>

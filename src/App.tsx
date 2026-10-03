@@ -16,7 +16,7 @@ type Screen =
   | { id: 'questionDetail'; questionId: string; from: string }
   | { id: 'saved' }
   | { id: 'aiTutor'; questionId?: string }
-  | { id: 'resources'; subject?: string }
+  | { id: 'resources'; subject?: string; chapter?: string; topic?: string }
   | { id: 'progress' }
   | { id: 'profile' };
 
@@ -38,7 +38,7 @@ function activeTab(screen: Screen): string {
 export default function App() {
   const [screen, setScreen] = useState<Screen>({ id: 'home' });
   const [history, setHistory] = useState<Screen[]>([]);
-  const [savedIds, setSavedIds] = useState<Set<string>>(new Set(['m3', 'p1', 'c3']));
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set(['m2', 'p1', 'c3']));
   const [viewedIds, setViewedIds] = useState<Set<string>>(new Set());
 
   const navigate = (next: Screen) => {
@@ -106,7 +106,7 @@ export default function App() {
             savedIds={savedIds}
             onOpenQuestion={handleOpenQuestion}
             onNavigate={handleNavigateFromHome}
-            viewedCount={viewedIds.size + 42}
+            learningTopicCount={18}
           />
         )}
 
@@ -127,7 +127,7 @@ export default function App() {
             onToggleSave={() => handleToggleSave(currentQuestion.id)}
             onBack={goBack}
             onAskAI={() => navigate({ id: 'aiTutor', questionId: currentQuestion.id })}
-            onResources={() => navigate({ id: 'resources', subject: currentQuestion.subject })}
+            onResources={() => navigate({ id: 'resources', subject: currentQuestion.subject, chapter: currentQuestion.chapter, topic: currentQuestion.title })}
           />
         )}
 
@@ -150,13 +150,15 @@ export default function App() {
         {screen.id === 'resources' && (
           <LearningResourcesScreen
             contextSubject={screen.subject}
+            contextChapter={screen.chapter}
+            contextTopic={screen.topic}
             onBack={goBack}
           />
         )}
 
         {screen.id === 'progress' && (
           <ProgressScreen
-            viewedCount={viewedIds.size + 42}
+            viewedCount={viewedIds.size}
             savedCount={savedIds.size}
           />
         )}
@@ -164,7 +166,7 @@ export default function App() {
         {screen.id === 'profile' && (
           <ProfileScreen
             savedCount={savedIds.size}
-            viewedCount={viewedIds.size + 42}
+            viewedCount={viewedIds.size}
             onNavigate={tab => {
               if (tab === 'progress') {
                 navigate({ id: 'progress' });

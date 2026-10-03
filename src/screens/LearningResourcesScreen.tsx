@@ -5,14 +5,18 @@ import FilterChip from '../components/FilterChip';
 
 interface Props {
   contextSubject?: string;
+  contextChapter?: string;
+  contextTopic?: string;
   onBack: () => void;
 }
 
-export default function LearningResourcesScreen({ contextSubject, onBack }: Props) {
+export default function LearningResourcesScreen({ contextSubject, contextChapter, contextTopic, onBack }: Props) {
   const [subject, setSubject] = useState(contextSubject || '');
+  const [chapter, setChapter] = useState(contextChapter || '');
+  const [topic, setTopic] = useState(contextTopic || '');
   const [playing, setPlaying] = useState<string | null>(null);
 
-  const filtered = VIDEOS.filter(v => !subject || v.subject === subject);
+  const filtered = VIDEOS.filter(v => (!subject || v.subject === subject) && (!chapter || v.chapter === chapter) && (!topic || v.title.toLowerCase() === topic.toLowerCase()));
 
   const playingVideo = VIDEOS.find(v => v.id === playing);
 
@@ -40,18 +44,16 @@ export default function LearningResourcesScreen({ contextSubject, onBack }: Prop
           <div className="w-full max-w-sm rounded-2xl overflow-hidden" style={{ background: '#fff' }}>
             <div className="relative" style={{ background: '#000', height: '200px' }}>
               <img src={playingVideo.thumbnail} alt={playingVideo.title} className="w-full h-full object-cover opacity-60" />
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <div className="w-16 h-16 rounded-full flex items-center justify-center mb-3" style={{ background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                </div>
-                <p className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>Demo Mode · YouTube not connected</p>
-              </div>
+              <div className="absolute inset-0 flex items-center justify-center"><span className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }}><svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z" /></svg></span></div>
             </div>
             <div className="p-4">
               <p className="text-sm font-bold mb-1" style={{ fontFamily: 'var(--font-display)', color: '#1E293B' }}>{playingVideo.title}</p>
-              <p className="text-xs mb-4" style={{ color: '#64748B' }}>{playingVideo.subject} · {playingVideo.chapter} · {playingVideo.views} views</p>
+                <p className="text-xs mb-4" style={{ color: '#64748B' }}>{playingVideo.subject} · {playingVideo.chapter}</p>
+              <button onClick={() => window.open(playingVideo.url, '_blank', 'noopener,noreferrer')}
+                className="w-full py-3 rounded-xl font-semibold text-sm mb-2"
+                style={{ background: '#FF0000', color: '#fff', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-display)' }}>
+                Watch on YouTube
+              </button>
               <button onClick={() => setPlaying(null)}
                 className="w-full py-3 rounded-xl font-semibold text-sm"
                 style={{ background: '#4F46E5', color: '#fff', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-display)' }}>
@@ -65,9 +67,9 @@ export default function LearningResourcesScreen({ contextSubject, onBack }: Prop
       {/* Subject filter */}
       <div className="px-5 py-3" style={{ background: '#fff', borderBottom: '1px solid #F1F5F9' }}>
         <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-          <FilterChip label="All Subjects" active={!subject} onClick={() => setSubject('')} />
+          <FilterChip label="All Subjects" active={!subject} onClick={() => { setSubject(''); setChapter(''); setTopic(''); }} />
           {SUBJECTS.map(s => (
-            <FilterChip key={s} label={s} active={subject === s} onClick={() => setSubject(s)} />
+            <FilterChip key={s} label={s} active={subject === s} onClick={() => { setSubject(s); setChapter(''); setTopic(''); }} />
           ))}
         </div>
       </div>

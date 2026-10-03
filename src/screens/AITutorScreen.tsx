@@ -13,23 +13,8 @@ interface Props {
   onBack: () => void;
 }
 
-const AI_RESPONSES: Record<string, string> = {
-  'explain': "Sure! Let me break this down step by step. First, identify the key information given in the question. Then, recall the relevant formula or concept that applies. Finally, substitute the values and solve carefully — check your answer makes sense in context! Would you like me to walk through a specific step in more detail?",
-  'simply': "Of course! Think of it this way: imagine you have a real-world situation that matches this problem. The core idea is straightforward once you strip away the formal language. The key thing to remember is the main principle behind it. Does that simpler view help?",
-  'example': "Great idea! Here's a related example: suppose we change the numbers slightly but keep the same structure. We'd follow the same logical steps. Working through examples like this is one of the most effective ways to build understanding. Want me to create another variation?",
-  'default': "That's a great question! Let me think through this with you. The concept here relates to a fundamental principle in this subject. Start by identifying what's given, what's being asked, and which rule or formula connects them. Then solve step by step. Do you want me to go deeper on any part?",
-};
-
 function getTime() {
   return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-}
-
-function getAIResponse(input: string): string {
-  const lower = input.toLowerCase();
-  if (lower.includes('simply') || lower.includes('simple') || lower.includes('easier')) return AI_RESPONSES.simply;
-  if (lower.includes('example')) return AI_RESPONSES.example;
-  if (lower.includes('explain') || lower.includes('how') || lower.includes('why') || lower.includes('what')) return AI_RESPONSES.explain;
-  return AI_RESPONSES.default;
 }
 
 export default function AITutorScreen({ contextQuestion, onBack }: Props) {
@@ -60,18 +45,40 @@ export default function AITutorScreen({ contextQuestion, onBack }: Props) {
     { label: '📝 Give an example', prompt: 'Can you give me a similar example to practice?' },
   ];
 
-  const send = (text: string) => {
-    if (!text.trim()) return;
+  const send = async (text: string) => {
+    if (!text.trim() || typing) return;
     const userMsg: Message = { id: Date.now().toString(), role: 'user', text: text.trim(), time: getTime() };
-    setMessages(prev => [...prev, userMsg]);
+    const conversation = [...messages, userMsg];
+    setMessages(conversation);
     setInput('');
     setTyping(true);
-
-    setTimeout(() => {
-      const aiMsg: Message = { id: (Date.now() + 1).toString(), role: 'ai', text: getAIResponse(text), time: getTime() };
+    try {
+      const response = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: text.trim(),
+          history: conversation.filter(message => message.id !== 'welcome').slice(0, -1).map(message => ({ role: message.role === 'ai' ? 'assistant' : 'user', content: message.text })),
+          question: contextQuestion ? {
+            subject: contextQuestion.subject,
+            chapter: contextQuestion.chapter,
+            question: contextQuestion.question,
+            answer: contextQuestion.answer,
+            explanation: contextQuestion.explanation,
+          } : null,
+        }),
+      });
+      if (!response.ok) throw new Error('AI request failed');
+      const result = await response.json() as { answer?: string };
+      if (!result.answer) throw new Error('AI response was empty');
+      const aiMsg: Message = { id: (Date.now() + 1).toString(), role: 'ai', text: result.answer, time: getTime() };
       setMessages(prev => [...prev, aiMsg]);
+    } catch {
+      const aiMsg: Message = { id: (Date.now() + 1).toString(), role: 'ai', text: "Sorry, I couldn't answer right now. Please try again.", time: getTime() };
+      setMessages(prev => [...prev, aiMsg]);
+    } finally {
       setTyping(false);
-    }, 1200 + Math.random() * 600);
+    }
   };
 
   return (
@@ -94,11 +101,11 @@ export default function AITutorScreen({ contextQuestion, onBack }: Props) {
             <p className="text-sm font-bold" style={{ fontFamily: 'var(--font-display)', color: '#1E293B' }}>AI Tutor</p>
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full" style={{ background: '#10B981' }} />
-              <p className="text-xs" style={{ color: '#10B981' }}>Online · Demo Mode</p>
+              <p className="text-xs" style={{ color: '#10B981' }}>Study assistant</p>
             </div>
           </div>
         </div>
-        <span className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background: '#FEF3C7', color: '#92400E' }}>Mock AI</span>
+        <span className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background: '#EEF2FF', color: '#4F46E5' }}>AI Study Help</span>
       </div>
 
       {/* Messages */}
@@ -128,11 +135,7 @@ export default function AITutorScreen({ contextQuestion, onBack }: Props) {
           <div className="flex items-end gap-2 mb-4">
             <div className="w-7 h-7 rounded-full flex items-center justify-center text-sm" style={{ background: 'linear-gradient(135deg, #4F46E5, #818CF8)' }}>🤖</div>
             <div className="px-4 py-3 rounded-2xl rounded-tl-sm" style={{ background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
-              <div className="flex gap-1 items-center h-4">
-                {[0, 1, 2].map(i => (
-                  <span key={i} className="w-1.5 h-1.5 rounded-full" style={{ background: '#94A3B8', animation: `bounce 1.2s ease-in-out ${i * 0.2}s infinite` }} />
-                ))}
-              </div>
+              <p className="text-xs" style={{ color: '#64748B' }}>AI Tutor is thinking...</p>
             </div>
           </div>
         )}
@@ -176,7 +179,7 @@ export default function AITutorScreen({ contextQuestion, onBack }: Props) {
             </svg>
           </button>
         </div>
-        <p className="text-xs text-center mt-2" style={{ color: '#94A3B8' }}>Demo mode · Responses are pre-written</p>
+        <p className="text-xs text-center mt-2" style={{ color: '#94A3B8' }}>Grade 11 study support</p>
       </div>
 
       <style>{`

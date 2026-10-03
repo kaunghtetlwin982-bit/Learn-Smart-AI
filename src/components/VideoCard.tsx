@@ -6,6 +6,7 @@ interface Video {
   duration: string;
   views: string;
   thumbnail: string;
+  url: string;
 }
 
 interface Props {
@@ -29,9 +30,7 @@ export default function VideoCard({ video, onPlay }: Props) {
             </svg>
           </div>
         </div>
-        <span className="absolute bottom-2 right-2 text-xs font-medium px-2 py-0.5 rounded" style={{ background: 'rgba(0,0,0,0.75)', color: '#fff' }}>
-          {video.duration}
-        </span>
+        {video.duration && <span className="absolute bottom-2 right-2 text-xs font-medium px-2 py-0.5 rounded" style={{ background: 'rgba(0,0,0,0.75)', color: '#fff' }}>{video.duration}</span>}
         <span className="absolute top-2 left-2 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1" style={{ background: '#FF0000', color: '#fff' }}>
           <svg width="10" height="10" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z" /></svg>
           YouTube
@@ -42,7 +41,7 @@ export default function VideoCard({ video, onPlay }: Props) {
         <div className="flex items-center gap-2">
           <span className="text-xs" style={{ color: '#64748B' }}>{video.subject}</span>
           <span style={{ color: '#CBD5E1' }}>·</span>
-          <span className="text-xs" style={{ color: '#64748B' }}>{video.views} views</span>
+          <span className="text-xs" style={{ color: '#64748B' }}>Watch on YouTube</span>
         </div>
       </div>
     </div>

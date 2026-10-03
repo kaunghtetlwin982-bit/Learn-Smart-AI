@@ -10,7 +10,7 @@ export default function ProgressScreen({ viewedCount, savedCount }: Props) {
     <div className="flex flex-col min-h-full pb-20">
       <div className="px-5 pt-10 pb-5" style={{ background: 'linear-gradient(135deg, #4F46E5 0%, #6366F1 100%)' }}>
         <h1 className="text-xl font-bold mb-1" style={{ fontFamily: 'var(--font-display)', color: '#fff' }}>My Progress</h1>
-        <p className="text-sm" style={{ color: 'rgba(255,255,255,0.75)' }}>Grade 11 · 2024 Academic Year</p>
+        <p className="text-sm" style={{ color: 'rgba(255,255,255,0.75)' }}>Grade 11 · 2026 Academic Year</p>
       </div>
 
       <div className="px-5 -mt-4">
