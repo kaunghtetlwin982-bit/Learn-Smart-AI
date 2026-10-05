@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { VIDEOS, SUBJECTS, SUBJECT_COLORS } from '../data/mockData';
 import VideoCard from '../components/VideoCard';
 import FilterChip from '../components/FilterChip';
+import { useLanguage } from '../i18n';
 
 interface Props {
   contextSubject?: string;
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function LearningResourcesScreen({ contextSubject, contextChapter, contextTopic, onBack }: Props) {
+  const { t, subjectLabel } = useLanguage();
   const [subject, setSubject] = useState(contextSubject || '');
   const [chapter, setChapter] = useState(contextChapter || '');
   const [topic, setTopic] = useState(contextTopic || '');
@@ -24,40 +26,40 @@ export default function LearningResourcesScreen({ contextSubject, contextChapter
     <div className="flex flex-col min-h-full pb-6 screen-enter">
       {/* Header */}
       <div className="flex items-center gap-3 px-5 py-4"
-        style={{ background: '#fff', borderBottom: '1px solid #F1F5F9' }}>
+        style={{ background: 'var(--app-surface)', borderBottom: '1px solid var(--app-border-soft)' }}>
         <button onClick={onBack}
           className="w-9 h-9 flex items-center justify-center rounded-xl"
-          style={{ background: '#F4F6FB', border: 'none', cursor: 'pointer' }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E293B" strokeWidth="2.5" strokeLinecap="round">
+          style={{ background: 'var(--app-bg)', border: 'none', cursor: 'pointer' }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--app-text)" strokeWidth="2.5" strokeLinecap="round">
             <path d="M15 18l-6-6 6-6" />
           </svg>
         </button>
         <div>
-          <h1 className="text-lg font-bold" style={{ fontFamily: 'var(--font-display)', color: '#1E293B' }}>Learning Resources</h1>
-          <p className="text-xs" style={{ color: '#64748B' }}>Video lessons for Grade 11</p>
+          <h1 className="text-lg font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--app-text)' }}>{t('resources', 'title')}</h1>
+          <p className="text-xs" style={{ color: 'var(--app-muted)' }}>{t('resources', 'subtitle')}</p>
         </div>
       </div>
 
       {/* Video modal overlay */}
       {playingVideo && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-5 fade-in" style={{ background: 'rgba(0,0,0,0.75)' }}>
-          <div className="w-full max-w-sm rounded-2xl overflow-hidden" style={{ background: '#fff' }}>
+          <div className="w-full max-w-sm rounded-2xl overflow-hidden" style={{ background: 'var(--app-surface)' }}>
             <div className="relative" style={{ background: '#000', height: '200px' }}>
               <img src={playingVideo.thumbnail} alt={playingVideo.title} className="w-full h-full object-cover opacity-60" />
               <div className="absolute inset-0 flex items-center justify-center"><span className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)' }}><svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z" /></svg></span></div>
             </div>
             <div className="p-4">
-              <p className="text-sm font-bold mb-1" style={{ fontFamily: 'var(--font-display)', color: '#1E293B' }}>{playingVideo.title}</p>
-                <p className="text-xs mb-4" style={{ color: '#64748B' }}>{playingVideo.subject} · {playingVideo.chapter}</p>
+              <p className="text-sm font-bold mb-1" style={{ fontFamily: 'var(--font-display)', color: 'var(--app-text)' }}>{playingVideo.title}</p>
+                <p className="text-xs mb-4" style={{ color: 'var(--app-muted)' }}>{playingVideo.subject} · {playingVideo.chapter}</p>
               <button onClick={() => window.open(playingVideo.url, '_blank', 'noopener,noreferrer')}
                 className="w-full py-3 rounded-xl font-semibold text-sm mb-2"
                 style={{ background: '#FF0000', color: '#fff', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-display)' }}>
-                Watch on YouTube
+                {t('resources', 'watch')}
               </button>
               <button onClick={() => setPlaying(null)}
                 className="w-full py-3 rounded-xl font-semibold text-sm"
-                style={{ background: '#4F46E5', color: '#fff', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-display)' }}>
-                Close
+                style={{ background: 'var(--app-primary)', color: '#fff', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-display)' }}>
+                {t('common', 'close')}
               </button>
             </div>
           </div>
@@ -65,20 +67,20 @@ export default function LearningResourcesScreen({ contextSubject, contextChapter
       )}
 
       {/* Subject filter */}
-      <div className="px-5 py-3" style={{ background: '#fff', borderBottom: '1px solid #F1F5F9' }}>
+      <div className="px-5 py-3" style={{ background: 'var(--app-surface)', borderBottom: '1px solid var(--app-border-soft)' }}>
         <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-          <FilterChip label="All Subjects" active={!subject} onClick={() => { setSubject(''); setChapter(''); setTopic(''); }} />
+          <FilterChip label={t('common', 'allSubjects')} active={!subject} onClick={() => { setSubject(''); setChapter(''); setTopic(''); }} />
           {SUBJECTS.map(s => (
-            <FilterChip key={s} label={s} active={subject === s} onClick={() => { setSubject(s); setChapter(''); setTopic(''); }} />
+            <FilterChip key={s} label={subjectLabel(s)} active={subject === s} onClick={() => { setSubject(s); setChapter(''); setTopic(''); }} />
           ))}
         </div>
       </div>
 
       {/* Video count */}
       <div className="px-5 pt-4 pb-2">
-        <p className="text-xs font-semibold" style={{ color: '#94A3B8', fontFamily: 'var(--font-display)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-          {filtered.length} Video{filtered.length !== 1 ? 's' : ''}
-          {subject ? ` · ${subject}` : ''}
+        <p className="text-xs font-semibold" style={{ color: 'var(--app-faint)', fontFamily: 'var(--font-display)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          {t('resources', 'count', { count: filtered.length, plural: filtered.length !== 1 ? 's' : '' })}
+          {subject ? ` · ${subjectLabel(subject)}` : ''}
         </p>
       </div>
 
@@ -91,8 +93,8 @@ export default function LearningResourcesScreen({ contextSubject, contextChapter
               ▶️
             </div>
             <div>
-              <p className="text-sm font-bold" style={{ color: '#fff', fontFamily: 'var(--font-display)' }}>YouTube Integration</p>
-              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.8)' }}>Demo mode · Connect YouTube API to enable real videos</p>
+              <p className="text-sm font-bold" style={{ color: '#fff', fontFamily: 'var(--font-display)' }}>{t('resources', 'integration')}</p>
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.8)' }}>{t('resources', 'demo')}</p>
             </div>
           </div>
         </div>
@@ -102,11 +104,11 @@ export default function LearningResourcesScreen({ contextSubject, contextChapter
       {subject && (
         <div className="px-5 mb-4">
           <div className="rounded-2xl p-4 flex items-center gap-3"
-            style={{ background: SUBJECT_COLORS[subject]?.bg || '#F1F5F9' }}>
+            style={{ background: SUBJECT_COLORS[subject]?.bg || 'var(--app-border-soft)' }}>
             <span className="text-3xl">{SUBJECT_COLORS[subject]?.icon}</span>
             <div>
-              <p className="text-sm font-bold" style={{ color: SUBJECT_COLORS[subject]?.text, fontFamily: 'var(--font-display)' }}>{subject}</p>
-              <p className="text-xs" style={{ color: '#64748B' }}>Grade 11 video lessons</p>
+              <p className="text-sm font-bold" style={{ color: SUBJECT_COLORS[subject]?.text, fontFamily: 'var(--font-display)' }}>{subjectLabel(subject)}</p>
+              <p className="text-xs" style={{ color: 'var(--app-muted)' }}>{t('resources', 'lessons')}</p>
             </div>
           </div>
         </div>

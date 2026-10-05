@@ -9,6 +9,7 @@ import AITutorScreen from './screens/AITutorScreen';
 import LearningResourcesScreen from './screens/LearningResourcesScreen';
 import ProgressScreen from './screens/ProgressScreen';
 import ProfileScreen from './screens/ProfileScreen';
+import QuizScreen from './screens/QuizScreen';
 
 type Screen =
   | { id: 'home' }
@@ -18,7 +19,8 @@ type Screen =
   | { id: 'aiTutor'; questionId?: string }
   | { id: 'resources'; subject?: string; chapter?: string; topic?: string }
   | { id: 'progress' }
-  | { id: 'profile' };
+  | { id: 'profile' }
+  | { id: 'quiz' };
 
 const TAB_SCREENS: Record<string, Screen> = {
   home: { id: 'home' },
@@ -76,6 +78,10 @@ export default function App() {
   };
 
   const handleNavigateFromHome = (tab: string, subject?: string) => {
+    if (tab === 'quiz') {
+      navigate({ id: 'quiz' });
+      return;
+    }
     setHistory([]);
     if (tab === 'questions' && subject) {
       setScreen({ id: 'questions', subject });
@@ -96,10 +102,10 @@ export default function App() {
 
   const showBottomNav = !['aiTutor', 'resources', 'questionDetail'].includes(screen.id) ||
     (screen.id === 'questionDetail');
-  const isFullScreen = screen.id === 'aiTutor' || screen.id === 'resources';
+  const isFullScreen = screen.id === 'aiTutor' || screen.id === 'resources' || screen.id === 'quiz';
 
   return (
-    <div className="flex flex-col" style={{ height: '100dvh', maxWidth: '430px', margin: '0 auto', background: '#F4F6FB', position: 'relative', overflow: 'hidden' }}>
+    <div className="flex flex-col" style={{ height: '100dvh', maxWidth: '430px', margin: '0 auto', background: 'var(--app-bg)', position: 'relative', overflow: 'hidden' }}>
       <div className={`flex-1 overflow-y-auto ${isFullScreen ? '' : ''}`} style={{ height: isFullScreen ? '100%' : undefined }}>
         {screen.id === 'home' && (
           <HomeScreen
@@ -173,6 +179,16 @@ export default function App() {
               } else {
                 handleTabChange(tab);
               }
+            }}
+          />
+        )}
+
+        {screen.id === 'quiz' && (
+          <QuizScreen
+            onExit={goBack}
+            onHome={() => {
+              setHistory([]);
+              setScreen({ id: 'home' });
             }}
           />
         )}

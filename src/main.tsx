@@ -2,6 +2,9 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
 import './index.css'
+import { LanguageProvider } from './i18n'
+import { AppearanceProvider } from './appearance'
+import { AudioProvider } from './audio'
 
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
@@ -13,6 +16,12 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
+    <AudioProvider>
+      <AppearanceProvider>
+        <LanguageProvider>
+          <App />
+        </LanguageProvider>
+      </AppearanceProvider>
+    </AudioProvider>
   </React.StrictMode>,
 )

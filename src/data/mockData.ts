@@ -11,6 +11,22 @@ export interface Question {
   difficulty: Difficulty;
 }
 
+export interface QuizOption {
+  id: string;
+  text: string;
+}
+
+export interface QuizQuestion {
+  id: string;
+  subject: string;
+  chapter: string;
+  question: string;
+  options: QuizOption[];
+  correctOptionId: string;
+  explanation?: string;
+  difficulty: Difficulty;
+}
+
 export const SUBJECTS = ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'English'];
 
 export const CHAPTERS: Record<string, string[]> = {
@@ -39,6 +55,68 @@ export const QUESTIONS: Question[] = [
   { id: 'e1', subject: 'English', chapter: 'Essay Writing', title: 'Essay Structure', question: 'Name the three main parts of an essay and describe their purpose.', answer: 'Introduction, body paragraphs, and conclusion.', explanation: 'The introduction presents the topic and thesis. Body paragraphs develop points with evidence. The conclusion draws the argument together.', difficulty: 'Easy' },
   { id: 'e2', subject: 'English', chapter: 'Poetry Analysis', title: 'Identifying Poetic Devices', question: 'Identify the poetic device in: “The wind whispered through the trees.”', answer: 'Personification', explanation: 'The wind is given the human action “whispered,” so the line uses personification. The repeated w sound also creates alliteration.', difficulty: 'Easy' },
   { id: 'e3', subject: 'English', chapter: 'Grammar', title: 'Active vs Passive Voice', question: 'Rewrite in active voice: “The experiment was conducted by the students.”', answer: 'The students conducted the experiment.', explanation: 'In active voice, the subject performs the action. Here, “the students” perform “conducted,” so they become the subject.', difficulty: 'Easy' },
+];
+
+const quizFromQuestion = (questionId: string, options: QuizOption[], correctOptionId: string): QuizQuestion => {
+  const question = QUESTIONS.find(item => item.id === questionId);
+  if (!question) throw new Error(`Quiz source question not found: ${questionId}`);
+  return {
+    id: `quiz-${question.id}`,
+    subject: question.subject,
+    chapter: question.chapter,
+    question: question.question,
+    options,
+    correctOptionId,
+    explanation: question.explanation,
+    difficulty: question.difficulty,
+  };
+};
+
+export const QUIZ_QUESTIONS: QuizQuestion[] = [
+  quizFromQuestion('m2', [
+    { id: 'a', text: 'x = −2 or x = −3' }, { id: 'b', text: 'x = 2 or x = 3' },
+    { id: 'c', text: 'x = 1 or x = 6' }, { id: 'd', text: 'x = 0 or x = 5' },
+  ], 'b'),
+  quizFromQuestion('m3', [
+    { id: 'a', text: '11x − 19' }, { id: 'b', text: '6x − 19' },
+    { id: 'c', text: '11x − 5' }, { id: 'd', text: '13x − 19' },
+  ], 'a'),
+  quizFromQuestion('p1', [
+    { id: 'a', text: '0.25 m/s²' }, { id: 'b', text: '4 m/s²' },
+    { id: 'c', text: '15 m/s²' }, { id: 'd', text: '100 m/s²' },
+  ], 'b'),
+  quizFromQuestion('p3', [
+    { id: 'a', text: '58 J' }, { id: 'b', text: '400 J' },
+    { id: 'c', text: '6.25 J' }, { id: 'd', text: '450 J' },
+  ], 'b'),
+  quizFromQuestion('c1', [
+    { id: 'a', text: '1s² 2s² 2p⁶ 3s² 3p²' }, { id: 'b', text: '1s² 2s² 2p⁶ 3s² 3p⁴' },
+    { id: 'c', text: '1s² 2s² 2p⁶ 3s² 3p⁶' }, { id: 'd', text: '1s² 2s² 2p⁴ 3s² 3p⁶' },
+  ], 'b'),
+  quizFromQuestion('c3', [
+    { id: 'a', text: 'pH = 1' }, { id: 'b', text: 'pH = 7' },
+    { id: 'c', text: 'pH = 2' }, { id: 'd', text: 'pH = 12' },
+  ], 'c'),
+  quizFromQuestion('b1', [
+    { id: 'a', text: 'Mitosis makes four haploid cells; meiosis makes two diploid cells.' },
+    { id: 'b', text: 'Mitosis makes two similar diploid cells; meiosis makes four varied haploid cells.' },
+    { id: 'c', text: 'Both processes make four genetically identical cells.' },
+    { id: 'd', text: 'Meiosis is used only for growth and repair.' },
+  ], 'b'),
+  quizFromQuestion('b2', [
+    { id: 'a', text: '1,000 kJ' }, { id: 'b', text: '10 kJ' },
+    { id: 'c', text: '100 kJ' }, { id: 'd', text: '5,000 kJ' },
+  ], 'c'),
+  quizFromQuestion('e2', [
+    { id: 'a', text: 'Simile' }, { id: 'b', text: 'Personification' },
+    { id: 'c', text: 'Hyperbole' }, { id: 'd', text: 'Onomatopoeia' },
+  ], 'b'),
+  quizFromQuestion('e3', [
+    { id: 'a', text: 'The experiment conducted the students.' },
+    { id: 'b', text: 'The experiment was conducting by the students.' },
+    { id: 'c', text: 'The students conducted the experiment.' },
+    { id: 'd', text: 'The students were conducted the experiment.' },
+  ], 'c'),
 ];
 
 type Video = { id: string; title: string; subject: string; chapter: string; duration: string; views: string; thumbnail: string; url: string };
