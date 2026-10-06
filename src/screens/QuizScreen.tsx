@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { QUIZ_QUESTIONS, SUBJECTS, type Difficulty, type QuizQuestion } from '../data/mockData';
 import { useLanguage } from '../i18n';
 import { useAudioSettings } from '../audio';
@@ -22,7 +22,7 @@ function shuffle<T>(items: T[]): T[] {
 
 export default function QuizScreen({ onExit, onHome }: Props) {
   const { t, subjectLabel, difficultyLabel } = useLanguage();
-  const { playSoundEffect, beginQuizAudio, endQuizAudio } = useAudioSettings();
+  const { playSoundEffect } = useAudioSettings();
   const [phase, setPhase] = useState<Phase>('setup');
   const [subject, setSubject] = useState('');
   const [difficulty, setDifficulty] = useState<Difficulty | ''>('');
@@ -48,8 +48,6 @@ export default function QuizScreen({ onExit, onHome }: Props) {
   const currentQuestion = attempt[questionIndex];
   const correctOption = currentQuestion?.options.find(option => option.id === currentQuestion.correctOptionId);
   const percentage = attempt.length ? Math.round((score / attempt.length) * 100) : 0;
-
-  useEffect(() => () => endQuizAudio(), [endQuizAudio]);
 
   const updateSubject = (value: string) => {
     const nextAvailable = QUIZ_QUESTIONS.filter(question =>
@@ -77,7 +75,6 @@ export default function QuizScreen({ onExit, onHome }: Props) {
     setQuestionIndex(0);
     setSelectedOptionId(null);
     setScore(0);
-    beginQuizAudio();
     playSoundEffect('quizStart');
     setPhase('play');
   };
@@ -95,7 +92,6 @@ export default function QuizScreen({ onExit, onHome }: Props) {
 
   const nextQuestion = () => {
     if (questionIndex === attempt.length - 1) {
-      endQuizAudio();
       playSoundEffect('quizComplete');
       setPhase('result');
       return;

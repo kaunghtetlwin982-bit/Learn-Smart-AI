@@ -18,8 +18,6 @@ interface AudioContextValue {
   setSoundEffectsEnabled: (enabled: boolean) => void;
   setBackgroundMusicEnabled: (enabled: boolean) => void;
   playSoundEffect: (effect: SoundEffect) => void;
-  beginQuizAudio: () => void;
-  endQuizAudio: () => void;
 }
 
 const AudioSettingsContext = createContext<AudioContextValue | null>(null);
@@ -50,16 +48,19 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   const [backgroundMusicEnabled, setBackgroundMusicState] = useState(() => readPreference(MUSIC_KEY, false));
   const effectAudio = useRef<Partial<Record<SoundEffect, HTMLAudioElement>>>({});
   const musicAudio = useRef<HTMLAudioElement | null>(null);
-  const quizActive = useRef(false);
+  const musicEnabledRef = useRef(backgroundMusicEnabled);
+  const musicPlayPending = useRef(false);
 
   const stopMusic = useCallback(() => {
     const audio = musicAudio.current;
     if (!audio) return;
+    musicPlayPending.current = false;
     audio.pause();
     audio.currentTime = 0;
   }, []);
 
   const startMusic = useCallback(() => {
+    if (!musicEnabledRef.current) return;
     let audio = musicAudio.current;
     if (!audio) {
       audio = new Audio(MUSIC_PATH);
@@ -68,8 +69,20 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       audio.preload = 'none';
       musicAudio.current = audio;
     }
-    attemptPlayback(audio);
-  }, []);
+    if (!audio.paused || musicPlayPending.current) return;
+
+    try {
+      musicPlayPending.current = true;
+      void audio.play().then(() => {
+        musicPlayPending.current = false;
+        if (!musicEnabledRef.current) stopMusic();
+      }, () => {
+        musicPlayPending.current = false;
+      });
+    } catch {
+      musicPlayPending.current = false;
+    }
+  }, [stopMusic]);
 
   const setSoundEffectsEnabled = useCallback((enabled: boolean) => {
     setSoundEffectsState(enabled);
@@ -77,10 +90,11 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setBackgroundMusicEnabled = useCallback((enabled: boolean) => {
+    musicEnabledRef.current = enabled;
     setBackgroundMusicState(enabled);
     savePreference(MUSIC_KEY, enabled);
     if (!enabled) stopMusic();
-    else if (quizActive.current) startMusic();
+    else startMusic();
   }, [startMusic, stopMusic]);
 
   const playSoundEffect = useCallback((effect: SoundEffect) => {
@@ -100,20 +114,39 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     attemptPlayback(audio);
   }, [soundEffectsEnabled]);
 
-  const beginQuizAudio = useCallback(() => {
-    quizActive.current = true;
+  useEffect(() => {
+    musicEnabledRef.current = backgroundMusicEnabled;
     if (backgroundMusicEnabled) startMusic();
-  }, [backgroundMusicEnabled, startMusic]);
+    else stopMusic();
+  }, [backgroundMusicEnabled, startMusic, stopMusic]);
 
-  const endQuizAudio = useCallback(() => {
-    quizActive.current = false;
-    stopMusic();
-  }, [stopMusic]);
+  useEffect(() => {
+    const retryMusicAfterInteraction = () => {
+      if (musicEnabledRef.current) startMusic();
+    };
+    window.addEventListener('pointerdown', retryMusicAfterInteraction);
+    window.addEventListener('keydown', retryMusicAfterInteraction);
+    window.addEventListener('touchstart', retryMusicAfterInteraction);
 
-  useEffect(() => () => {
-    stopMusic();
-    Object.values(effectAudio.current).forEach(audio => audio?.pause());
-  }, [stopMusic]);
+    return () => {
+      window.removeEventListener('pointerdown', retryMusicAfterInteraction);
+      window.removeEventListener('keydown', retryMusicAfterInteraction);
+      window.removeEventListener('touchstart', retryMusicAfterInteraction);
+      stopMusic();
+      const music = musicAudio.current;
+      if (music) {
+        music.removeAttribute('src');
+        music.load();
+        musicAudio.current = null;
+      }
+      Object.values(effectAudio.current).forEach(audio => {
+        audio?.pause();
+        audio?.removeAttribute('src');
+        audio?.load();
+      });
+      effectAudio.current = {};
+    };
+  }, [startMusic, stopMusic]);
 
   const value = useMemo(() => ({
     soundEffectsEnabled,
@@ -121,9 +154,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     setSoundEffectsEnabled,
     setBackgroundMusicEnabled,
     playSoundEffect,
-    beginQuizAudio,
-    endQuizAudio,
-  }), [soundEffectsEnabled, backgroundMusicEnabled, setSoundEffectsEnabled, setBackgroundMusicEnabled, playSoundEffect, beginQuizAudio, endQuizAudio]);
+  }), [soundEffectsEnabled, backgroundMusicEnabled, setSoundEffectsEnabled, setBackgroundMusicEnabled, playSoundEffect]);
 
   return <AudioSettingsContext.Provider value={value}>{children}</AudioSettingsContext.Provider>;
 }
